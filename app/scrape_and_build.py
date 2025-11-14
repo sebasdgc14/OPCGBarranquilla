@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import os
+import json
+from typing import Optional
 
 
 def scrape_set(url: str) -> pd.DataFrame:
@@ -64,6 +66,7 @@ def download_images(df: pd.DataFrame, directory: str) -> None:
     Download images from URLs in the DataFrame and save them to the specified folder.
     """
     os.makedirs(directory, exist_ok=True)
+    printed_half = False
     for index, row in df.iterrows():
         img_url = row["UIL"]
         card_id = row["UID"]
@@ -74,12 +77,73 @@ def download_images(df: pd.DataFrame, directory: str) -> None:
             with open(file_path, "wb") as out_file:
                 for chunk in response.iter_content(chunk_size=8192):
                     out_file.write(chunk)
-            print(f"Downloaded {card_id}.png")
+            if not printed_half and index >= df.shape[0] // 2:
+                print("50% downloaded")
+                printed_half = True
         except requests.exceptions.RequestException as e:
             print(f"Could not download {card_id}.png from {img_url}: {e}")
+    print("All images downloaded.")
 
 
-card_set_url = "https://en.onepiece-cardgame.com/cardlist/?series=569026"
-set_dataframe = scrape_set(card_set_url)
-print(set_dataframe)
-# download_images(set_dataframe, "images")
+def dowload_set_imgs(
+    set_key: str,
+    expansion_key: str,
+    dowload_directory: Optional[str] = None,
+    keys_directory: str = "app/sets_ids.json",
+) -> None:
+    """
+    Download images for a specific set key from the JSON file.
+    Valid set_key and expansion_key pairs are:
+    - main_sets_ids: OP-01 to OP-13 or the most recent main set
+    - starter_sets_ids: ST-01 to ST-28 or the most recent starter set
+    - extra_sets_ids: EB-01 to EB-02 or the most recent extra set
+    - other_sets_ids: Other, Promotion_Card
+
+    Kwargs:
+    keys_directory: Path to the JSON file containing set IDs. Defaults to "app/sets_ids.json".
+    """
+    if dowload_directory is None:
+        dowload_directory = f"app/images/{expansion_key}"
+    with open(keys_directory, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    set_id = data.get(set_key).get(expansion_key)
+    if not set_id or set_id is None:
+        print(
+            f"Set key '{set_key}' not found in expansion '{expansion_key}'. \n Make sure to check the expansion_key spelling."
+        )
+        return
+    card_set_url = f"https://en.onepiece-cardgame.com/cardlist/?series=569{set_id}"
+    set_dataframe = scrape_set(card_set_url)
+    download_images(set_dataframe, dowload_directory)
+
+
+def dowload_all_set_imgs(
+    dowload_directory: str = "app/images", keys_directory: str = "app/sets_ids.json"
+) -> None:
+    """
+    Download images for all sets defined in the JSON file.
+    Kwargs:
+    dowload_directory: Base directory to save images. Defaults to "app/images".
+    keys_directory: Path to the JSON file containing set IDs. Defaults to "app/sets_ids.json".
+    """
+    with open("app/sets_ids.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    for set_key, expansions in data.items():
+        for expansion_key in expansions.keys():
+            print(f"Downloading images for {set_key} - {expansion_key}")
+            dowload_set_imgs(
+                set_key=set_key,
+                expansion_key=expansion_key,
+                dowload_directory=f"app/images/{expansion_key}",
+                keys_directory="app/sets_ids.json",
+            )
+    print("All sets downloaded.")
+
+
+if __name__ == "__main__":
+    print("Running scrape_and_build.py")
+    # df = scrape_set("https://en.onepiece-cardgame.com/cardlist/?series=569801")
+    # download_images(df, "app/images/Others")
+    # dowload_set_imgs("main_sets_ids", "OP-01")
+    # dowload_all_set_imgs()
