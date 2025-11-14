@@ -19,7 +19,11 @@ def scrape_set(url: str) -> pd.DataFrame:
         # All card information
         unique_id = card_info[index].get("id")
         unique_img_link = f"https://en.onepiece-cardgame.com/images/cardlist/card/{unique_id}.png?251031"
-        print_set = card_info[index].find("div", class_="getInfo").h3.next_sibling.text
+        info = card_info[index].find("div", class_="getInfo")
+        if info:  # This is exclusively to handle ST14 brook in ST26 which has not set info listed
+            print_set = info.h3.next_sibling.text
+        else:
+            print_set = ""
         # Public info
         id = card_info[index].span.text
         rarity = card_info[index].find_all("span")[1].text
@@ -70,11 +74,12 @@ def download_images(df: pd.DataFrame, directory: str) -> None:
             with open(file_path, "wb") as out_file:
                 for chunk in response.iter_content(chunk_size=8192):
                     out_file.write(chunk)
-            # print(f"Downloaded {card_id}.png")
+            print(f"Downloaded {card_id}.png")
         except requests.exceptions.RequestException as e:
             print(f"Could not download {card_id}.png from {img_url}: {e}")
 
 
-card_set_url = "https://en.onepiece-cardgame.com/cardlist/?series=569101"
+card_set_url = "https://en.onepiece-cardgame.com/cardlist/?series=569026"
 set_dataframe = scrape_set(card_set_url)
 print(set_dataframe)
+# download_images(set_dataframe, "images")
