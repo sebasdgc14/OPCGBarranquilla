@@ -30,11 +30,15 @@ def scrape_set(url: str) -> pd.DataFrame:
         id = card_info[index].span.text
         rarity = card_info[index].find_all("span")[1].text
         name = card_info[index].find("div", class_="cardName").text
-        card_type = (
+        card_type = ",".join(
             card_info[index].find("div", class_="feature").h3.next_sibling.split("/")
         )
-        color = card_info[index].find("div", class_="color").h3.next_sibling.split("/")
-        effect = card_info[index].find("div", class_="text").contents[1::2]
+        color = ",".join(
+            card_info[index].find("div", class_="color").h3.next_sibling.split("/")
+        )
+        effect = ",".join(
+            [str(e) for e in card_info[index].find("div", class_="text").contents[1::2]]
+        )
         block = card_info[index].find("div", class_="block").h3.next_sibling
         attribute = card_info[index].find("div", class_="attribute").i.text
         power = card_info[index].find("div", class_="power").h3.next_sibling.text
@@ -59,6 +63,59 @@ def scrape_set(url: str) -> pd.DataFrame:
         }
         set_db = pd.concat([set_db, pd.DataFrame([card])], ignore_index=True)
     return set_db
+
+
+def scrape_all_sets(
+    download_directory: str = "app/info", keys_directory: str = "app/sets_ids.json"
+) -> None:
+    """
+    Scrape all sets defined in the JSON file and return a concatenated DataFrame.
+    Kwargs:
+    download_directory: Directory to save the scraped data. Defaults to "app/info".
+    keys_directory: Path to the JSON file containing set IDs. Defaults to "app/sets_ids.json".
+    """
+    with open("app/sets_ids.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    main_sets_df = {}
+    starter_sets_df = {}
+    extra_sets_df = {}
+    best_sets_df = {}
+    other_sets_df = {}
+    os.makedirs(download_directory, exist_ok=True)
+    for set_key, expansions in data.items():
+        for expansion_key in expansions.keys():
+            set_id = data.get(set_key).get(expansion_key)
+            print(f"Scraping info for {set_key} - {expansion_key}")
+            df = scrape_set(
+                f"https://en.onepiece-cardgame.com/cardlist/?series=569{set_id}"
+            )
+            if set_key == "main_sets_ids":
+                main_sets_df[f"{expansion_key}"] = df
+            elif set_key == "starter_sets_ids":
+                starter_sets_df[f"{expansion_key}"] = df
+            elif set_key == "extra_sets_ids":
+                extra_sets_df[f"{expansion_key}"] = df
+            elif set_key == "best_sets_ids":
+                best_sets_df[f"{expansion_key}"] = df
+            elif set_key == "other_sets_ids":
+                other_sets_df[f"{expansion_key}"] = df
+
+    set_names = [
+        "main_sets_df",
+        "starter_sets_df",
+        "extra_sets_df",
+        "best_sets_df",
+        "other_sets_df",
+    ]
+    for i, a in enumerate(
+        [main_sets_df, starter_sets_df, extra_sets_df, best_sets_df, other_sets_df]
+    ):
+        with pd.HDFStore(
+            os.path.join(download_directory, f"{set_names[i]}_sets.h5"), mode="w"
+        ) as store:
+            for key, df in a.items():
+                store.put(key, df, format="table", data_columns=True)
+    return None
 
 
 def download_images(df: pd.DataFrame, directory: str) -> None:
@@ -143,6 +200,7 @@ def dowload_all_set_imgs(
 
 if __name__ == "__main__":
     print("Running scrape_and_build.py")
+    scrape_all_sets()
     # df = scrape_set("https://en.onepiece-cardgame.com/cardlist/?series=569801")
     # download_images(df, "app/images/Others")
     # dowload_set_imgs("main_sets_ids", "OP-01")
