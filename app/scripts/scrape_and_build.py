@@ -5,6 +5,10 @@ import os
 import json
 from typing import Optional
 
+path_images = "app/images"
+path_info = "app/info"
+path_keys = "app/scripts/sets_ids.json"
+
 
 def scrape_set(url: str) -> pd.DataFrame:
     """
@@ -66,7 +70,7 @@ def scrape_set(url: str) -> pd.DataFrame:
 
 
 def scrape_all_sets(
-    download_directory: str = "app/info", keys_directory: str = "app/sets_ids.json"
+    download_directory: str = path_info, keys_directory: str = path_keys
 ) -> None:
     """
     Scrape all sets defined in the JSON file and return a concatenated DataFrame.
@@ -121,8 +125,8 @@ def scrape_all_sets(
 def scrape_and_append_set(
     set_key: str,
     expansion_key: str,
-    data_directory: str = "app/info",
-    keys_directory: str = "app/sets_ids.json",
+    data_directory: str = path_info,
+    keys_directory: str = path_keys,
 ) -> None:
     """
     Scrape a single new set and append it to the corresponding HDF5 file.
@@ -173,7 +177,7 @@ def scrape_and_append_set(
         print(f"Error appending to HDF5 file: {e}")
 
 
-def download_images(df: pd.DataFrame, directory: str) -> None:
+def download_images(df: pd.DataFrame, directory: str = path_images) -> None:
     """
     Download images from URLs in the DataFrame and save them to the specified folder.
     """
@@ -201,13 +205,13 @@ def dowload_set_imgs(
     set_key: str,
     expansion_key: str,
     dowload_directory: Optional[str] = None,
-    keys_directory: str = "app/sets_ids.json",
+    keys_directory: str = path_keys,
 ) -> None:
     """
     Download images for a specific set key from the JSON file.
     Valid set_key and expansion_key pairs are:
-    - main_sets_ids: OP-01 to OP-13 or the most recent main set
-    - starter_sets_ids: ST-01 to ST-28 or the most recent starter set
+    - main_sets_ids: OP-01 to OP-14 or the most recent main set
+    - starter_sets_ids: ST-01 to ST-29 or the most recent starter set
     - extra_sets_ids: EB-01 to EB-02 or the most recent extra set
     - other_sets_ids: Other, Promotion_Card
 
@@ -215,13 +219,13 @@ def dowload_set_imgs(
     keys_directory: Path to the JSON file containing set IDs. Defaults to "app/sets_ids.json".
     """
     if dowload_directory is None:
-        dowload_directory = f"app/images/{expansion_key}"
+        dowload_directory = f"{path_images}/{expansion_key}"
     with open(keys_directory, "r", encoding="utf-8") as f:
         data = json.load(f)
     set_id = data.get(set_key).get(expansion_key)
     if not set_id or set_id is None:
         print(
-            f"Set key '{set_key}' not found in expansion '{expansion_key}'. \n Make sure to check the expansion_key spelling."
+            f"Set key '{set_key}' not found in expansion '{expansion_key}'. \n Make sure to check the expansion key spelling."
         )
         return
     card_set_url = f"https://en.onepiece-cardgame.com/cardlist/?series=569{set_id}"
@@ -257,7 +261,7 @@ if __name__ == "__main__":
     print("Running scrape_and_build.py")
     # scrape_and_append_set("starter_sets_ids", "ST29")
     # scrape_all_sets()
-    # df = scrape_set("https://en.onepiece-cardgame.com/cardlist/?series=569801")
-    # download_images(df, "app/images/Others")
-    # dowload_set_imgs("main_sets_ids", "OP-01")
+    # df = scrape_set("https://en.onepiece-cardgame.com/cardlist/?series=569114")
+    # download_images(df)
+    # dowload_set_imgs("starter_sets_ids", "ST29")
     # dowload_all_set_imgs()

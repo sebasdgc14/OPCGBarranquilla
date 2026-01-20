@@ -106,6 +106,6 @@ def create_all_tables(
         print(e)
 
 
-if __name__ == "__main__":
-    all_sets = read_all_h5_sets()
-    create_all_tables(all_sets)
+# if __name__ == "__main__":
+# all_sets = read_all_h5_sets()
+# create_all_tables(all_sets)
