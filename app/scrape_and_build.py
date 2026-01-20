@@ -118,6 +118,61 @@ def scrape_all_sets(
     return None
 
 
+def scrape_and_append_set(
+    set_key: str,
+    expansion_key: str,
+    data_directory: str = "app/info",
+    keys_directory: str = "app/sets_ids.json",
+) -> None:
+    """
+    Scrape a single new set and append it to the corresponding HDF5 file.
+
+    Args:
+        set_key: The category key (e.g., "main_sets_ids", "starter_sets_ids", "extra_sets_ids", "best_sets_ids", "other_sets_ids")
+        expansion_key: The specific expansion (e.g., "OP-01", "ST-01", "EB-01")
+        data_directory: Directory where HDF5 files are stored. Defaults to "app/info".
+        keys_directory: Path to JSON file containing set IDs. Defaults to "app/sets_ids.json".
+    """
+    with open(keys_directory, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    set_id = data.get(set_key, {}).get(expansion_key)
+    if not set_id:
+        print(
+            f"Set key '{set_key}' with expansion '{expansion_key}' not found in {keys_directory}.\n"
+            f"Make sure the set_key and expansion_key are spelled correctly."
+        )
+        return
+
+    # Scrape the set
+    print(f"Scraping {set_key} - {expansion_key}")
+    df = scrape_set(f"https://en.onepiece-cardgame.com/cardlist/?series=569{set_id}")
+
+    # Map set_key to HDF5 filename
+    set_name_map = {
+        "main_sets_ids": "main_sets_df_sets.h5",
+        "starter_sets_ids": "starter_sets_df_sets.h5",
+        "extra_sets_ids": "extra_sets_df_sets.h5",
+        "best_sets_ids": "best_sets_df_sets.h5",
+        "other_sets_ids": "other_sets_df_sets.h5",
+    }
+
+    hdf_filename = set_name_map.get(set_key)
+    if not hdf_filename:
+        print(f"Unknown set_key: {set_key}")
+        return
+
+    hdf_path = os.path.join(data_directory, hdf_filename)
+
+    # Append to the HDF5 file
+    try:
+        with pd.HDFStore(hdf_path, mode="a") as store:
+            store.put(expansion_key, df, format="table", data_columns=True)
+        print(f"Successfully appended {expansion_key} to {hdf_filename}")
+    except Exception as e:
+        print(f"Error appending to HDF5 file: {e}")
+
+
 def download_images(df: pd.DataFrame, directory: str) -> None:
     """
     Download images from URLs in the DataFrame and save them to the specified folder.
@@ -200,7 +255,8 @@ def dowload_all_set_imgs(
 
 if __name__ == "__main__":
     print("Running scrape_and_build.py")
-    scrape_all_sets()
+    # scrape_and_append_set("starter_sets_ids", "ST29")
+    # scrape_all_sets()
     # df = scrape_set("https://en.onepiece-cardgame.com/cardlist/?series=569801")
     # download_images(df, "app/images/Others")
     # dowload_set_imgs("main_sets_ids", "OP-01")
