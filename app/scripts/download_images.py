@@ -45,9 +45,9 @@ def dowload_set_imgs(
     """
     Download images for a specific set from the SQLite database.
     Valid set_key and expansion_key pairs are:
-    - main_sets_ids: OP-01 to OP-14 or the most recent main set
-    - starter_sets_ids: ST-01 to ST-29 or the most recent starter set
-    - extra_sets_ids: EB-01 to EB-02 or the most recent extra set
+    - main_sets_ids: OP01 to OP14-EB04 or the most recent main set
+    - starter_sets_ids: ST01 to ST29 or the most recent starter set
+    - extra_sets_ids: EB01 to EB02 or the most recent extra set
     - best_sets_ids: Best sets
     - other_sets_ids: Other, Promotion_Card
 
