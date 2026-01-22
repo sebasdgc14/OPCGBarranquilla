@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String  # , ForeignKey, UniqueConstraint
-from database import Base
+from .database import Base
 # from sqlalchemy.orm import relationship
 
 
@@ -32,10 +32,13 @@ class Cards(Base):
     effect = Column(String)  # Text description of the effect
 
 
-# class User(Base):
-#     __tablename__ = "users"
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String)
-#     email = Column(String)
-#     password = Column(String)
-#     blogs = relationship("Blog", back_populates="creator")
+class User(Base):
+    """
+    email: for login purposes \n
+    password: to be hashed
+    """
+
+    __tablename__ = "Users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String)
+    password = Column(String)
