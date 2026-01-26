@@ -1,26 +1,6 @@
-from pydantic import BaseModel
-
-
-# class Card(BaseModel):
-#     """
-#     Card schema
-#     """
-
-#     unique_id: str  # Unique identifier for the art
-#     unique_img_link: str  # Image link to specific art
-#     print_set: str  # Print set, different to card_id sometimes
-
-#     id: str  # Unique identifier for the card OP01-001, ST02-002, etc.
-#     rarity: str  # C, UC, R, SR, SEC, SP, TR, L
-#     name: str  # Name of the card
-#     card_type: str  # Straw Hat Crew / Marine / Warlord / Pirate / Revolutionary
-#     color: str  # Red, Green, Blue, Purple, Black, Yellow or combination A/B
-#     block: str  # Card block for rotation
-#     attribute: str  # STR, SPECIAL, STRIKE, SLASH, etc
-#     power: str  # Card power
-#     cost: str  # DON!! cost
-#     counter: str  # Counter value
-#     effect: str  # Text description of the effect
+from pydantic import BaseModel, Field
+from typing import List
+from datetime import datetime
 
 
 # Login purposes
@@ -35,7 +15,6 @@ class ShowUser(BaseModel):
     """
 
     email: str
-    password: str
 
 
 class Login(BaseModel):
@@ -50,3 +29,34 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
+
+
+class CreateDeck(BaseModel):
+    name: str
+    is_wishlist: bool = False
+
+
+class AddCardToDeck(BaseModel):
+    card_id: int
+    quantity: int = Field(default=1, ge=1)
+
+
+class DeckCardOut(BaseModel):
+    card_db_unique_id: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+
+
+class DeckOut(BaseModel):
+    id: int
+    name: str
+    is_wishlist: bool
+    created_at: datetime
+
+    # ✅ MATCHES ORM ATTRIBUTE NAME
+    deck_cards: List[DeckCardOut]
+
+    class Config:
+        orm_mode = True
