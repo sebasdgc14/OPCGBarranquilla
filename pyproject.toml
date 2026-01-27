@@ -21,3 +21,6 @@ dependencies = [
     "tables>=3.10.2",
     "uvicorn>=0.38.0",
 ]
+
+[project.scripts]
+opcg = "core.main:main"
