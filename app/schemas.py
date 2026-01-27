@@ -10,10 +10,6 @@ class User(BaseModel):
 
 
 class ShowUser(BaseModel):
-    """
-    Temporary to remove password showing
-    """
-
     email: str
 
 
@@ -46,7 +42,7 @@ class DeckCardOut(BaseModel):
     quantity: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DeckOut(BaseModel):
@@ -54,9 +50,7 @@ class DeckOut(BaseModel):
     name: str
     is_wishlist: bool
     created_at: datetime
-
-    # ✅ MATCHES ORM ATTRIBUTE NAME
     deck_cards: List[DeckCardOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
