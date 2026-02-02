@@ -2,7 +2,10 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from schemas import TokenData
 from fastapi import status, HTTPException
-from core.config import SECRET_KEY, ALGORITHM  # , ACCESS_TOKEN_EXPIRE_MINUTES
+from core.config import settings
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):

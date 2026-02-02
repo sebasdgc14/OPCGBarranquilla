@@ -1,12 +1,10 @@
 import os
 import sqlite3
 import psycopg2
-from dotenv import load_dotenv
+from core.config import settings
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-PATH_DATABASE_LOCAL = os.getenv("PATH_DATABASE_LOCAL", "db")
+DATABASE_URL = settings.DATABASE_URL
+PATH_DATABASE_LOCAL = settings.PATH_DATABASE_LOCAL
 
 SQLITE_TABLES = ["Cards"]
 

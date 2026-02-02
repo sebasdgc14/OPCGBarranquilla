@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from core.config import DATABASE_URL, PATH_DATABASE_LOCAL
+from core.config import settings
 
-SQLALCHEMY_DATABASE_URL = DATABASE_URL
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+PATH_DATABASE_LOCAL = settings.PATH_DATABASE_LOCAL
 
 connect_args = {}
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):

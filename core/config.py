@@ -1,28 +1,19 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings
 
 
-def _get_required(name: str) -> str:
-    value = os.getenv(name)
-    if value is None or value == "":
-        raise ValueError(f"Missing required environment variable: {name}")
-    return value
+class Settings(BaseSettings):
+    DATABASE_URL: str
+    PATH_IMAGES: str
+    PATH_DATABASE_LOCAL: str
+    PATH_KEYS: str
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = True
 
 
-def _get_int_required(name: str) -> int:
-    value = _get_required(name)
-    try:
-        return int(value)
-    except ValueError as exc:
-        raise ValueError(f"Invalid integer for environment variable: {name}") from exc
-
-
-DATABASE_URL = _get_required("DATABASE_URL")
-PATH_IMAGES = os.getenv("PATH_IMAGES", "images")
-PATH_DATABASE_LOCAL = os.getenv("PATH_DATABASE_LOCAL", "db")
-PATH_KEYS = os.getenv("PATH_KEYS", "app/scripts/sets_ids.json")
-SECRET_KEY = _get_required("SECRET_KEY")
-ALGORITHM = _get_required("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = _get_int_required("ACCESS_TOKEN_EXPIRE_MINUTES")
+settings = Settings()  # instantiate settings to use throughout the application

@@ -6,8 +6,10 @@ from db.database import get_db
 from sqlalchemy.orm import Session
 from schemas import Token
 from datetime import timedelta
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from core.config import settings
 from repository.security.JWTtoken import create_access_token
+
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 def authenticate_user(request: schemas.Login, db: Session = Depends(get_db)):

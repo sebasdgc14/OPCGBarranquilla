@@ -1,18 +1,17 @@
 from bs4 import BeautifulSoup
 import requests
-import os
 import json
-from dotenv import load_dotenv
 from pathlib import Path
 import models
 from db.database import engine
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
+from core.config import settings
 
-load_dotenv()  # Lets get environment variables
-path_images = os.getenv("PATH_IMAGES")
-path_db = os.getenv("PATH_DATABASE_LOCAL")
-path_keys = os.getenv("PATH_KEYS")
+
+path_images = settings.PATH_IMAGES
+path_db = settings.PATH_DATABASE_LOCAL
+path_images = settings.PATH_KEYS
 
 
 def scrape_set(url: str, set_type: str, db: Session):

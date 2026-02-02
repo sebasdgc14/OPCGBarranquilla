@@ -4,12 +4,11 @@ import os
 import json
 import sqlite3
 from typing import Optional
-from dotenv import load_dotenv
+from core.config import settings
 
-load_dotenv()  # Lets get environment variables
-path_images = os.getenv("PATH_IMAGES")
-path_db = os.getenv("PATH_DATABASE_LOCAL")
-path_keys = os.getenv("PATH_KEYS")
+path_images = settings.PATH_IMAGES
+path_db = settings.PATH_DATABASE_LOCAL
+path_keys = settings.PATH_KEYS
 
 
 def download_images(df: pd.DataFrame, directory: str = path_images) -> None:
@@ -55,7 +54,6 @@ def dowload_set_imgs(
     if dowload_directory is None:
         safe_print_set = _safe_dir_name(print_set)
         dowload_directory = f"{path_images}/{safe_print_set}"
-
 
     db_path = os.path.join(data_directory, "cards.db")
 
